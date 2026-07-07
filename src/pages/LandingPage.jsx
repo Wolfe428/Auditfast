@@ -61,17 +61,56 @@ const faqs = [
   },
 ]
 
+const DEFAULT_SHARE_URL = 'https://75a83e8f4741fe695a3b2e25a36b9f8c.ctonew.app'
+
+function cleanIssueTitle(issue) {
+  if (!issue?.title) return 'an important conversion issue'
+
+  return issue.title
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .trim()
+    .toLowerCase()
+}
+
+function getShareUrl() {
+  if (typeof window === 'undefined') return DEFAULT_SHARE_URL
+  return window.location.origin || DEFAULT_SHARE_URL
+}
+
+function buildTweetText({ score, issues }) {
+  const shareUrl = getShareUrl()
+  const firstIssue = cleanIssueTitle(issues?.[0])
+
+  if (score >= 80) {
+    return `Ran my landing page through AuditFast and got ${score}/100. Not bad for a first draft, but the audit picked up ${firstIssue} I hadn't considered. Free tool, no sign-up required.\n\n${shareUrl}`
+  }
+
+  if (score >= 50) {
+    const issueSnippets = (issues || [])
+      .slice(0, 3)
+      .map((issue) => cleanIssueTitle(issue))
+
+    const [issue1 = 'headline clarity gaps', issue2 = 'CTA friction', issue3 = 'weak trust signals'] = issueSnippets
+
+    return `My landing page scored ${score}/100 on AuditFast. Found 3 things to fix — ${issue1}, ${issue2}, and ${issue3}. Easy wins.\n\nCheck yours: ${shareUrl}`
+  }
+
+  return `AuditFast gave my landing page a ${score}/100. Brutal but fair. The good news: I now have a prioritized list of exactly what to fix. $10 for the full report is cheaper than my coffee habit this month.\n\n😬 Get your score: ${shareUrl}`
+}
+
 export default function LandingPage() {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [showProModal, setShowProModal] = useState(false)
+  const [shareMessage, setShareMessage] = useState('')
   const navigate = useNavigate()
 
   async function handleFreeAudit(e) {
     e.preventDefault()
     setError('')
+    setShareMessage('')
 
     if (!url.trim()) {
       setError('Please enter a landing page URL')
@@ -87,7 +126,7 @@ export default function LandingPage() {
     try {
       const data = await auditLandingPage(normalizedUrl)
       setResult(data)
-    } catch (err) {
+    } catch {
       setError('Audit failed. Please try again.')
     } finally {
       setLoading(false)
@@ -129,6 +168,30 @@ export default function LandingPage() {
     if (score >= 80) return 'Great'
     if (score >= 50) return 'Needs Work'
     return 'Poor'
+  }
+
+  const tweetText = result
+    ? buildTweetText({ score: result.score, issues: result.summary })
+    : ''
+
+  const tweetIntentUrl = tweetText
+    ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`
+    : ''
+
+  function handleShareOnX() {
+    if (!tweetIntentUrl) return
+    window.open(tweetIntentUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  async function handleCopyShareText() {
+    if (!tweetText) return
+
+    try {
+      await navigator.clipboard.writeText(tweetText)
+      setShareMessage('Copied! Paste it on X to share your score.')
+    } catch {
+      setShareMessage('Could not copy automatically. You can still share on X directly.')
+    }
   }
 
   return (
@@ -209,21 +272,32 @@ export default function LandingPage() {
                 {scoreLabel(result.score)}
               </div>
 
-              <button
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({ text: result.shareText })
-                  } else {
-                    navigator.clipboard.writeText(result.shareText)
-                  }
-                }}
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm text-white/70 transition hover:bg-white/20"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                Share My Score
-              </button>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={handleShareOnX}
+                  className="inline-flex items-center gap-2 rounded-full bg-sky-500/20 px-5 py-2 text-sm font-semibold text-sky-200 transition hover:bg-sky-500/30"
+                >
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18.9 2H22l-6.77 7.74L23.2 22h-6.26l-4.9-6.4L6.45 22H3.34l7.24-8.27L.8 2h6.42l4.43 5.85L18.9 2Zm-1.1 18.1h1.73L6.3 3.8H4.45l13.35 16.3Z" />
+                  </svg>
+                  Share on X
+                </button>
+
+                <button
+                  onClick={handleCopyShareText}
+                  className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm text-white/80 transition hover:bg-white/20"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V5a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2h-2m-6 4H6a2 2 0 01-2-2v-8a2 2 0 012-2h8a2 2 0 012 2v2" />
+                  </svg>
+                  Copy post text
+                </button>
+              </div>
+
+              <p className="mt-3 text-xs text-gray-500">
+                One click to post your score and bring other founders back to AuditFast.
+              </p>
+              {shareMessage && <p className="mt-2 text-xs text-emerald-400">{shareMessage}</p>}
             </div>
 
             <div className="mb-6">

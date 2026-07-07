@@ -40,7 +40,7 @@ export default function ReportPage() {
 
   if (!auditData) return null
 
-  const { score, summary, pro, rewrites, suggestions, actionPlan, url } = auditData
+  const { score, pro, rewrites, suggestions, actionPlan, url } = auditData
 
   function scoreColor(s) {
     if (s >= 70) return 'text-emerald-400'

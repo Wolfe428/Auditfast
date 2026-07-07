@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toPng } from 'html-to-image'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
+import ScoreCard from '../components/ScoreCard.jsx'
 import { auditLandingPage } from '../services/auditApi.js'
 import { getProPaymentLink, hasManagedPaymentLink } from '../services/stripeConfig.js'
 
@@ -62,6 +64,7 @@ const faqs = [
 ]
 
 const DEFAULT_SHARE_URL = 'https://75a83e8f4741fe695a3b2e25a36b9f8c.ctonew.app'
+const SHARE_CARD_CTA_TEXT = 'Get your free audit at AuditFast'
 
 function cleanIssueTitle(issue) {
   if (!issue?.title) return 'an important conversion issue'
@@ -98,6 +101,35 @@ function buildTweetText({ score, issues }) {
   return `AuditFast gave my landing page a ${score}/100. Brutal but fair. The good news: I now have a prioritized list of exactly what to fix. $10 for the full report is cheaper than my coffee habit this month.\n\n😬 Get your score: ${shareUrl}`
 }
 
+function formatIssueListForCard(issues = []) {
+  return issues
+    .slice(0, 3)
+    .map((issue) => issue?.title || 'Conversion issue')
+}
+
+function safeDomainLabel(url) {
+  if (!url) return 'landing-page'
+
+  try {
+    return new URL(url).hostname.replace(/[^a-zA-Z0-9.-]/g, '-')
+  } catch {
+    return 'landing-page'
+  }
+}
+
+function dataUrlToFile(dataUrl, fileName) {
+  const [metadata, base64Data] = dataUrl.split(',')
+  const mime = metadata.match(/:(.*?);/)?.[1] || 'image/png'
+  const binary = atob(base64Data)
+  const bytes = new Uint8Array(binary.length)
+
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+
+  return new File([bytes], fileName, { type: mime })
+}
+
 export default function LandingPage() {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
@@ -105,6 +137,8 @@ export default function LandingPage() {
   const [result, setResult] = useState(null)
   const [showProModal, setShowProModal] = useState(false)
   const [shareMessage, setShareMessage] = useState('')
+  const [isPreparingShare, setIsPreparingShare] = useState(false)
+  const scoreCardRef = useRef(null)
   const navigate = useNavigate()
 
   async function handleFreeAudit(e) {
@@ -178,9 +212,77 @@ export default function LandingPage() {
     ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`
     : ''
 
-  function handleShareOnX() {
+  const cardIssues = result ? formatIssueListForCard(result.summary) : []
+  const shareFileName = result
+    ? `auditfast-score-${result.score}-${safeDomainLabel(result.url)}.png`
+    : 'auditfast-score-card.png'
+
+  const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+
+  async function generateShareCardImage() {
+    if (!scoreCardRef.current) {
+      throw new Error('Share card is not ready yet')
+    }
+
+    return toPng(scoreCardRef.current, {
+      cacheBust: true,
+      pixelRatio: 2,
+      width: 1200,
+      height: 628,
+      canvasWidth: 1200,
+      canvasHeight: 628,
+      backgroundColor: '#1a2332',
+    })
+  }
+
+  function downloadShareCard(dataUrl, fileName) {
+    const link = document.createElement('a')
+    link.href = dataUrl
+    link.download = fileName
+    link.click()
+  }
+
+  async function handleShareOnX() {
     if (!tweetIntentUrl) return
-    window.open(tweetIntentUrl, '_blank', 'noopener,noreferrer')
+
+    setIsPreparingShare(true)
+
+    try {
+      const imageDataUrl = await generateShareCardImage()
+      downloadShareCard(imageDataUrl, shareFileName)
+      window.open(tweetIntentUrl, '_blank', 'noopener,noreferrer')
+      setShareMessage('Opened X and downloaded your score card image. Attach it in your post.')
+    } catch {
+      window.open(tweetIntentUrl, '_blank', 'noopener,noreferrer')
+      setShareMessage('Opened X. We could not generate the share image automatically this time.')
+    } finally {
+      setIsPreparingShare(false)
+    }
+  }
+
+  async function handleNativeShare() {
+    if (!tweetText || !canNativeShare) return
+
+    setIsPreparingShare(true)
+
+    try {
+      const imageDataUrl = await generateShareCardImage()
+      const file = dataUrlToFile(imageDataUrl, shareFileName)
+      const shareData = { title: 'My AuditFast Score', text: tweetText, files: [file] }
+
+      if (navigator.canShare && !navigator.canShare(shareData)) {
+        downloadShareCard(imageDataUrl, shareFileName)
+        setShareMessage('Downloaded your score card image. Attach it while sharing.')
+        return
+      }
+
+      await navigator.share(shareData)
+      setShareMessage('Shared! Your post included the score card image.')
+    } catch {
+      setShareMessage('Could not open native share. Try "Share on X" instead.')
+    } finally {
+      setIsPreparingShare(false)
+    }
   }
 
   async function handleCopyShareText() {
@@ -188,7 +290,7 @@ export default function LandingPage() {
 
     try {
       await navigator.clipboard.writeText(tweetText)
-      setShareMessage('Copied! Paste it on X to share your score.')
+      setShareMessage('Copied! Paste it on X with your score card image.')
     } catch {
       setShareMessage('Could not copy automatically. You can still share on X directly.')
     }
@@ -275,13 +377,27 @@ export default function LandingPage() {
               <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
                 <button
                   onClick={handleShareOnX}
-                  className="inline-flex items-center gap-2 rounded-full bg-sky-500/20 px-5 py-2 text-sm font-semibold text-sky-200 transition hover:bg-sky-500/30"
+                  disabled={isPreparingShare}
+                  className="inline-flex items-center gap-2 rounded-full bg-sky-500/20 px-5 py-2 text-sm font-semibold text-sky-200 transition hover:bg-sky-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M18.9 2H22l-6.77 7.74L23.2 22h-6.26l-4.9-6.4L6.45 22H3.34l7.24-8.27L.8 2h6.42l4.43 5.85L18.9 2Zm-1.1 18.1h1.73L6.3 3.8H4.45l13.35 16.3Z" />
                   </svg>
-                  Share on X
+                  {isPreparingShare ? 'Preparing card...' : 'Share on X'}
                 </button>
+
+                {canNativeShare && (
+                  <button
+                    onClick={handleNativeShare}
+                    disabled={isPreparingShare}
+                    className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-5 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                    </svg>
+                    Native share (with image)
+                  </button>
+                )}
 
                 <button
                   onClick={handleCopyShareText}
@@ -295,7 +411,7 @@ export default function LandingPage() {
               </div>
 
               <p className="mt-3 text-xs text-gray-500">
-                One click to post your score and bring other founders back to AuditFast.
+                Sharing now uses a generated 1200×628 score card image built from your audit results.
               </p>
               {shareMessage && <p className="mt-2 text-xs text-emerald-400">{shareMessage}</p>}
             </div>
@@ -371,6 +487,20 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+      )}
+
+      {result && (
+        <div className="pointer-events-none fixed -left-[10000px] top-0" aria-hidden="true">
+          <div ref={scoreCardRef}>
+            <ScoreCard
+              score={result.score}
+              auditedUrl={result.url}
+              issues={cardIssues}
+              showCta
+              ctaText={SHARE_CARD_CTA_TEXT}
+            />
+          </div>
+        </div>
       )}
 
       {!result && (

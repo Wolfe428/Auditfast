@@ -1,0 +1,289 @@
+/* AuditFast — Social Share Score Card (1200 x 628) */
+
+.score-card {
+  position: relative;
+  width: 1200px;
+  height: 628px;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1a2332;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.sc-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 85% 15%, rgba(0, 196, 140, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 15% 85%, rgba(0, 196, 140, 0.06) 0%, transparent 50%),
+    linear-gradient(135deg, #1a2332 0%, #2a3b54 100%);
+  pointer-events: none;
+}
+
+.sc-bg-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.sc-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 36px 48px;
+  box-sizing: border-box;
+}
+
+.sc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sc-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sc-logo-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 8px rgba(0, 196, 140, 0.3));
+}
+
+.sc-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.sc-brand-name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.sc-brand-tag {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.sc-score-label-badge {
+  padding: 6px 18px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sc-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  padding: 0 20px;
+}
+
+.sc-score-ring-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sc-score-ring-wrapper svg {
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+}
+
+.sc-score-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.sc-score-number {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.sc-score-label {
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.sc-url-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.sc-url-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.sc-url {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  word-break: break-all;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-block;
+  max-width: 100%;
+}
+
+.sc-issues {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.sc-issues-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 10px;
+}
+
+.sc-issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sc-issue-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sc-issue-number {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sc-issue-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.sc-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sc-cta-arrow {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--score-color, #00c48c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sc-cta-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--score-color, #00c48c);
+  letter-spacing: -0.01em;
+}
+
+.sc-user-attribution {
+  position: absolute;
+  bottom: 36px;
+  right: 48px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 400;
+}
+
+@media (max-width: 1240px) {
+  .score-card {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1200 / 628;
+  }
+
+  .sc-content {
+    padding: 3% 4%;
+  }
+
+  .sc-main {
+    gap: 4%;
+    padding: 0 2%;
+  }
+
+  .sc-score-number {
+    font-size: clamp(28px, 4.5vw, 52px);
+  }
+
+  .sc-score-label {
+    font-size: clamp(12px, 1.8vw, 20px);
+  }
+
+  .sc-url {
+    font-size: clamp(13px, 1.8vw, 20px);
+    padding: 8px 12px;
+  }
+
+  .sc-issue-text {
+    font-size: clamp(11px, 1.3vw, 14px);
+  }
+
+  .sc-brand-name {
+    font-size: clamp(16px, 2vw, 22px);
+  }
+
+  .sc-cta-text {
+    font-size: clamp(12px, 1.4vw, 15px);
+  }
+}

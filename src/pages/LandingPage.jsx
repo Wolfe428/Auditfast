@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import { auditLandingPage } from '../services/auditApi.js'
-import { getProPaymentLink, hasManagedPaymentLink } from '../services/stripeConfig.js'
+import { getProPaymentLink } from '../services/stripeConfig.js'
 
 const trustCards = [
   {
@@ -61,17 +60,55 @@ const faqs = [
   },
 ]
 
+const DEFAULT_SHARE_URL = 'https://www.auditfastpro.com'
+
+function cleanIssueTitle(issue) {
+  if (!issue?.title) return 'an important conversion issue'
+
+  return issue.title
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .trim()
+    .toLowerCase()
+}
+
+function getShareUrl() {
+  if (typeof window === 'undefined') return DEFAULT_SHARE_URL
+  return window.location.origin || DEFAULT_SHARE_URL
+}
+
+function buildTweetText({ score, issues }) {
+  const shareUrl = getShareUrl()
+  const firstIssue = cleanIssueTitle(issues?.[0])
+
+  if (score >= 80) {
+    return `Ran my landing page through AuditFast and got ${score}/100. Not bad for a first draft, but the audit picked up ${firstIssue} I hadn't considered. Free tool, no sign-up required.\n\n${shareUrl}`
+  }
+
+  if (score >= 50) {
+    const issueSnippets = (issues || [])
+      .slice(0, 3)
+      .map((issue) => cleanIssueTitle(issue))
+
+    const [issue1 = 'headline clarity gaps', issue2 = 'CTA friction', issue3 = 'weak trust signals'] = issueSnippets
+
+    return `My landing page scored ${score}/100 on AuditFast. Found 3 things to fix — ${issue1}, ${issue2}, and ${issue3}. Easy wins.\n\nCheck yours: ${shareUrl}`
+  }
+
+  return `AuditFast gave my landing page a ${score}/100. Brutal but fair. The good news: I now have a prioritized list of exactly what to fix. $10 for the full report is cheaper than my coffee habit this month.\n\n😬 Get your score: ${shareUrl}`
+}
+
 export default function LandingPage() {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
-  const [showProModal, setShowProModal] = useState(false)
-  const navigate = useNavigate()
+  const [proUnlocked, setProUnlocked] = useState(false)
+  const [shareMessage, setShareMessage] = useState('')
 
   async function handleFreeAudit(e) {
     e.preventDefault()
     setError('')
+    setShareMessage('')
 
     if (!url.trim()) {
       setError('Please enter a landing page URL')
@@ -87,36 +124,32 @@ export default function LandingPage() {
     try {
       const data = await auditLandingPage(normalizedUrl)
       setResult(data)
-    } catch (err) {
+      setProUnlocked(false)
+    } catch {
       setError('Audit failed. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleUpgradeToPro() {
-    setShowProModal(true)
-  }
-
-  async function handleProCheckout() {
+  function handlePurchaseAndRevealPro() {
     if (!result) return
-    setShowProModal(false)
+
+    setError('')
+    setProUnlocked(true)
 
     const paymentLink = getProPaymentLink()
 
-    if (paymentLink) {
-      window.location.href = paymentLink
+    if (!paymentLink) {
+      setError('Stripe checkout is not configured yet. Please contact support.')
       return
     }
 
-    // If the managed payment link is not configured yet, keep demo flow usable.
-    if (!hasManagedPaymentLink()) {
-      setError('Pro checkout is not configured yet. Ask support to enable the Stripe payment link.')
-      navigate('/report/pro-sample', { state: { audit: result, paid: true } })
-      return
-    }
+    const paymentTab = window.open(paymentLink, '_blank', 'noopener,noreferrer')
 
-    setError('Unable to open hosted checkout. Please try again.')
+    if (!paymentTab) {
+      setError('Pro report is now visible below. Please allow pop-ups and click again to complete payment in Stripe.')
+    }
   }
 
   function scoreColor(score) {
@@ -129,6 +162,47 @@ export default function LandingPage() {
     if (score >= 80) return 'Great'
     if (score >= 50) return 'Needs Work'
     return 'Poor'
+  }
+
+  function severityBadge(severity) {
+    const colors = {
+      critical: { bg: 'rgba(239,68,68,0.15)', text: '#f87171', dot: 'bg-red-400' },
+      major: { bg: 'rgba(251,191,36,0.15)', text: '#fbbf24', dot: 'bg-amber-400' },
+      minor: { bg: 'rgba(96,165,250,0.15)', text: '#60a5fa', dot: 'bg-blue-400' },
+    }
+
+    const c = colors[severity] || colors.minor
+
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium" style={{ backgroundColor: c.bg, color: c.text }}>
+        <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
+        {severity}
+      </span>
+    )
+  }
+
+  const tweetText = result
+    ? buildTweetText({ score: result.score, issues: result.summary })
+    : ''
+
+  const tweetIntentUrl = tweetText
+    ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`
+    : ''
+
+  function handleShareOnX() {
+    if (!tweetIntentUrl) return
+    window.open(tweetIntentUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  async function handleCopyShareText() {
+    if (!tweetText) return
+
+    try {
+      await navigator.clipboard.writeText(tweetText)
+      setShareMessage('Copied! Paste it on X to share your score.')
+    } catch {
+      setShareMessage('Could not copy automatically. You can still share on X directly.')
+    }
   }
 
   return (
@@ -209,21 +283,32 @@ export default function LandingPage() {
                 {scoreLabel(result.score)}
               </div>
 
-              <button
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({ text: result.shareText })
-                  } else {
-                    navigator.clipboard.writeText(result.shareText)
-                  }
-                }}
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm text-white/70 transition hover:bg-white/20"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                Share My Score
-              </button>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={handleShareOnX}
+                  className="inline-flex items-center gap-2 rounded-full bg-sky-500/20 px-5 py-2 text-sm font-semibold text-sky-200 transition hover:bg-sky-500/30"
+                >
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18.9 2H22l-6.77 7.74L23.2 22h-6.26l-4.9-6.4L6.45 22H3.34l7.24-8.27L.8 2h6.42l4.43 5.85L18.9 2Zm-1.1 18.1h1.73L6.3 3.8H4.45l13.35 16.3Z" />
+                  </svg>
+                  Share on X
+                </button>
+
+                <button
+                  onClick={handleCopyShareText}
+                  className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm text-white/80 transition hover:bg-white/20"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V5a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2h-2m-6 4H6a2 2 0 01-2-2v-8a2 2 0 012-2h8a2 2 0 012 2v2" />
+                  </svg>
+                  Copy post text
+                </button>
+              </div>
+
+              <p className="mt-3 text-xs text-gray-500">
+                One click to post your score and bring other founders back to AuditFast.
+              </p>
+              {shareMessage && <p className="mt-2 text-xs text-emerald-400">{shareMessage}</p>}
             </div>
 
             <div className="mb-6">
@@ -289,12 +374,148 @@ export default function LandingPage() {
                 One-time payment. No subscription. If the paid report fails to generate correctly, we will fix it or refund it.
               </p>
               <button
-                onClick={handleUpgradeToPro}
+                onClick={handlePurchaseAndRevealPro}
                 className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:shadow-emerald-500/40"
               >
-                Unlock Pro Audit — $10
+                {proUnlocked ? 'Open Stripe Checkout Again — $10' : 'Purchase — $10 & Reveal Pro Report'}
               </button>
+              <p className="mt-3 text-xs text-gray-500">
+                Clicking purchase opens Stripe in a new tab and immediately shows your Pro report below.
+              </p>
             </div>
+
+            {proUnlocked && (
+              <div className="mt-8 space-y-8">
+                <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 p-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">Pro audit unlocked</p>
+                  <h2 className="mt-2 text-2xl font-bold text-white">Your full report is ready</h2>
+                  <p className="mt-2 text-sm text-gray-300">
+                    You can review all Pro recommendations right now. Stripe checkout opened in a new tab so you can complete payment without losing this report.
+                  </p>
+                </div>
+
+                <div>
+                  <h2 className="mb-5 text-2xl font-bold text-white">All Pro Issues ({result.pro?.length || 0})</h2>
+                  <div className="space-y-4">
+                    {(result.pro || []).map((issue, i) => (
+                      <div key={`${issue.title}-${i}`} className="rounded-xl border border-white/10 bg-white/5 p-5">
+                        <div className="mb-2 flex items-center gap-2">
+                          {severityBadge(issue.severity)}
+                          <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-gray-400">{issue.type}</span>
+                        </div>
+                        <h3 className="mb-1 font-semibold text-white">{issue.title}</h3>
+                        <p className="mb-3 text-sm text-gray-400">{issue.description}</p>
+                        <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                          <span className="text-xs font-medium uppercase tracking-wider text-emerald-400">Suggestion</span>
+                          <p className="mt-1 text-sm text-emerald-300">{issue.suggestion}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {(result.rewrites || []).length > 0 && (
+                  <div>
+                    <h2 className="mb-5 text-2xl font-bold text-white">Copy Rewrites</h2>
+                    <div className="space-y-4">
+                      {result.rewrites.map((rw, i) => (
+                        <div key={`rewrite-${i}`} className="rounded-xl border border-white/10 bg-white/5 p-5">
+                          <div className="mb-2 flex items-center justify-between">
+                            <h3 className="font-semibold text-white">Rewrite #{i + 1}</h3>
+                            <span className="text-xs font-medium text-emerald-400">{rw.expectedImpact}</span>
+                          </div>
+                          <div className="mb-3">
+                            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Problem</span>
+                            <p className="mt-1 text-sm text-gray-400">{rw.problem}</p>
+                          </div>
+                          <div className="mb-3">
+                            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Original</span>
+                            <p className="mt-1 text-sm text-gray-400 line-through">{rw.original}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-medium uppercase tracking-wider text-emerald-400">Suggested Rewrite</span>
+                            <p className="mt-1 text-sm text-emerald-300">{rw.rewrite}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {(result.suggestions || []).length > 0 && (
+                  <div>
+                    <h2 className="mb-5 text-2xl font-bold text-white">UX & Layout Improvements</h2>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {result.suggestions.map((sug, i) => (
+                        <div key={`suggestion-${i}`} className="rounded-xl border border-white/10 bg-white/5 p-5">
+                          <div className="mb-2 flex items-center justify-between">
+                            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-gray-400">{sug.area}</span>
+                            <span className={`text-xs font-medium ${
+                              sug.impact === 'High' ? 'text-red-400' : sug.impact === 'Medium' ? 'text-amber-400' : 'text-blue-400'
+                            }`}>{sug.impact} Impact</span>
+                          </div>
+                          <h3 className="mb-1 font-semibold text-white">{sug.title}</h3>
+                          <p className="mb-3 text-sm text-gray-400">{sug.currentState}</p>
+                          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                            <span className="text-xs font-medium uppercase tracking-wider text-emerald-400">Recommendation</span>
+                            <p className="mt-1 text-sm text-emerald-300">{sug.suggestion}</p>
+                            <div className="mt-2 text-[10px] uppercase tracking-widest text-emerald-500/50">{sug.beforeAfter}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {result.actionPlan && (
+                  <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 p-8">
+                    <h2 className="text-2xl font-bold text-white">Prioritized Action Plan</h2>
+                    <p className="mt-2 text-sm text-gray-300">Fix these in order for the fastest conversion lift.</p>
+
+                    <div className="mt-6 grid gap-8 md:grid-cols-3 text-left">
+                      <div>
+                        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-red-400">1. Quick Wins (Critical)</h3>
+                        <div className="space-y-2">
+                          {(result.actionPlan.quickWins || []).map((item, i) => (
+                            <div key={`quick-${i}`} className="rounded-lg border border-white/5 bg-black/20 p-3 text-sm">
+                              <div className="font-medium text-white">{item.title}</div>
+                              <div className="mt-1 text-xs uppercase text-gray-500">{item.dimension}</div>
+                            </div>
+                          ))}
+                          {(result.actionPlan.quickWins || []).length === 0 && <p className="text-xs italic text-gray-500">No critical issues found.</p>}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-amber-400">2. Strategic Fixes (Major)</h3>
+                        <div className="space-y-2">
+                          {(result.actionPlan.strategic || []).map((item, i) => (
+                            <div key={`strategic-${i}`} className="rounded-lg border border-white/5 bg-black/20 p-3 text-sm">
+                              <div className="font-medium text-white">{item.title}</div>
+                              <div className="mt-1 text-xs uppercase text-gray-500">{item.dimension}</div>
+                            </div>
+                          ))}
+                          {(result.actionPlan.strategic || []).length === 0 && <p className="text-xs italic text-gray-500">No major issues found.</p>}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-400">3. Long-term (Minor)</h3>
+                        <div className="space-y-2">
+                          {(result.actionPlan.longTerm || []).map((item, i) => (
+                            <div key={`long-${i}`} className="rounded-lg border border-white/5 bg-black/20 p-3 text-sm">
+                              <div className="font-medium text-white">{item.title}</div>
+                              <div className="mt-1 text-xs uppercase text-gray-500">{item.dimension}</div>
+                            </div>
+                          ))}
+                          {(result.actionPlan.longTerm || []).length === 0 && <p className="text-xs italic text-gray-500">No minor issues found.</p>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -417,54 +638,6 @@ export default function LandingPage() {
       </section>
 
       <Footer />
-
-      {showProModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-gray-900 p-8 shadow-2xl">
-            <h2 className="text-2xl font-bold text-white">Unlock Pro Audit</h2>
-            <p className="mt-2 text-sm text-gray-400">
-              Get the full report with copy rewrites, UX suggestions, and a prioritized action plan.
-            </p>
-            <div className="mt-6 rounded-xl bg-white/5 p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400">Pro Audit</span>
-                <span className="text-2xl font-bold text-white">$10</span>
-              </div>
-              <ul className="mt-3 space-y-2 text-sm text-gray-400">
-                <li className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                  3 specific copy rewrites
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                  UX improvement suggestions
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                  One-time payment — no subscription
-                </li>
-              </ul>
-            </div>
-            <p className="mt-4 text-xs leading-5 text-gray-500">
-              If your paid report does not generate correctly, we will fix it or refund it.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setShowProModal(false)}
-                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleProCheckout}
-                className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:shadow-emerald-500/40"
-              >
-                Purchase — $10
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

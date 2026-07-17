@@ -20,8 +20,8 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true })
 })
 
-// Fallback to index.html for SPA routing
-app.get('/{*path}', (req, res) => {
+// Fallback to index.html for SPA routing — catch-all for unmatched routes
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 

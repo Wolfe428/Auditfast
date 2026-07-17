@@ -1,15 +1,13 @@
-import { useParams, useLocation, Link } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import { auditLandingPage } from '../services/auditApi.js'
 
 export default function ReportPage() {
-  const { id } = useParams()
   const location = useLocation()
   const [auditData, setAuditData] = useState(location.state?.audit || null)
   const [loading, setLoading] = useState(!auditData)
-  const paid = location.state?.paid || id === 'pro-sample'
 
   useEffect(() => {
     if (!auditData) {
@@ -40,7 +38,7 @@ export default function ReportPage() {
 
   if (!auditData) return null
 
-  const { score, summary, pro, rewrites, suggestions, actionPlan, url } = auditData
+  const { score, pro, rewrites, suggestions, actionPlan, url } = auditData
 
   function scoreColor(s) {
     if (s >= 70) return 'text-emerald-400'
@@ -63,24 +61,6 @@ export default function ReportPage() {
     )
   }
 
-  if (!paid) {
-    return (
-      <div className="min-h-screen bg-gray-950">
-        <Header />
-        <div className="px-6 pt-32 pb-20 text-center">
-          <div className="mx-auto max-w-md">
-            <div className="text-6xl mb-4">🔒</div>
-            <h1 className="text-2xl font-bold text-white">Pro Audit Required</h1>
-            <p className="mt-2 text-gray-400">Purchase the Pro Audit to view the full report with copy rewrites and UX suggestions.</p>
-            <Link to="/" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:shadow-emerald-500/40">
-              ← Back to Audit
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gray-950">

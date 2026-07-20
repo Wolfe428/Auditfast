@@ -9,6 +9,7 @@ import BlogCROForFounders from './pages/BlogCROForFounders.jsx'
 import BlogCROHeuristicsGuide from './pages/BlogCROHeuristicsGuide.jsx'
 import BlogConversionKillers from './pages/BlogConversionKillers.jsx'
 import BlogHeadlineFormulas from './pages/BlogHeadlineFormulas.jsx'
+import BlogAuditFastVsCrazyEgg from './pages/BlogAuditFastVsCrazyEgg.jsx'
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/blog/cro-heuristics-guide" element={<BlogCROHeuristicsGuide />} />
       <Route path="/blog/10-common-conversion-killers" element={<BlogConversionKillers />} />
       <Route path="/blog/headline-formulas-that-convert" element={<BlogHeadlineFormulas />} />
+      <Route path="/blog/auditfast-vs-crazyegg" element={<BlogAuditFastVsCrazyEgg />} />
     </Routes>
   )
 }

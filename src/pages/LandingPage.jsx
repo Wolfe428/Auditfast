@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
+import SEOHead from '../components/SEOHead.jsx'
 import { auditLandingPage } from '../services/auditApi.js'
 import { getProPaymentLink, hasManagedPaymentLink } from '../services/stripeConfig.js'
 
@@ -12,11 +13,6 @@ function scoreHex(score) {
   return '#FF6B6B'
 }
 
-function scoreColorClass(score) {
-  if (score >= 80) return 'text-emerald-400'
-  if (score >= 50) return 'text-amber-400'
-  return 'text-red-400'
-}
 
 function scoreBgClass(score) {
   if (score >= 80) return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
@@ -135,7 +131,7 @@ const faqs = [
   },
 ]
 
-const DEFAULT_SHARE_URL = 'https://75a83e8f4741fe695a3b2e25a36b9f8c.ctonew.app'
+const DEFAULT_SHARE_URL = 'https://www.auditfastpro.com'
 
 function cleanIssueTitle(issue) {
   if (!issue?.title) return 'an important conversion issue'
@@ -265,8 +261,15 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <Header />
+    <>
+      <SEOHead
+        title="AuditFast — AI-Powered CRO Audits in 60 Seconds"
+        description="Get instant, AI-powered Conversion Rate Optimization audits for your landing page. No consultant needed."
+        path="/"
+        keywords={['landing page audit', 'CRO audit', 'conversion rate optimization', 'SaaS conversions']}
+      />
+      <div className="min-h-screen bg-gray-950">
+        <Header />
 
       <section className="relative overflow-hidden px-6 pt-32 pb-20 text-center">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/20 via-transparent to-transparent" />
@@ -662,6 +665,7 @@ export default function LandingPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }

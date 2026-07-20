@@ -52,7 +52,8 @@ export default function Footer() {
           <p className="text-xs text-gray-500">
             © 2026 AuditFast. Built for founders who want better conversions.
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-6">
+            <Link to="/blog" className="text-xs text-gray-500 transition hover:text-white">Blog</Link>
             <Link to="/terms" className="text-xs text-gray-500 transition hover:text-white">Terms</Link>
             <Link to="/privacy" className="text-xs text-gray-500 transition hover:text-white">Privacy</Link>
             <Link to="/refund-policy" className="text-xs text-gray-500 transition hover:text-white">Refund Policy</Link>

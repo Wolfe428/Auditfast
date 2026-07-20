@@ -1,9 +1,17 @@
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
+import SEOHead from '../components/SEOHead.jsx'
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
+    <>
+      <SEOHead
+        title="Privacy Policy | AuditFast"
+        description="Read how AuditFast handles URLs, audit content, payments, and privacy protections."
+        path="/privacy"
+        keywords={['AuditFast privacy policy', 'CRO audit privacy']}
+      />
+      <div className="min-h-screen bg-gray-950 flex flex-col">
       <Header />
       <main className="flex-grow px-6 pt-32 pb-20">
         <div className="mx-auto max-w-3xl">
@@ -41,6 +49,7 @@ export default function PrivacyPage() {
         </div>
       </main>
       <Footer />
-    </div>
+      </div>
+    </>
   )
 }

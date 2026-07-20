@@ -16,6 +16,12 @@ export default function Header() {
         </Link>
         
         <div className="flex items-center gap-6">
+          <Link
+            to="/blog"
+            className="hidden text-sm font-medium text-gray-400 transition hover:text-white sm:block"
+          >
+            Blog
+          </Link>
           <a
             href={`mailto:${supportEmail}`}
             className="hidden text-sm font-medium text-gray-400 transition hover:text-white sm:block"

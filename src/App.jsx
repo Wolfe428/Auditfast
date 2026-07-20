@@ -10,11 +10,13 @@ import BlogCROHeuristicsGuide from './pages/BlogCROHeuristicsGuide.jsx'
 import BlogConversionKillers from './pages/BlogConversionKillers.jsx'
 import BlogHeadlineFormulas from './pages/BlogHeadlineFormulas.jsx'
 import BlogAuditFastVsCrazyEgg from './pages/BlogAuditFastVsCrazyEgg.jsx'
+import BlogIndexPage from './pages/BlogIndexPage.jsx'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/blog" element={<BlogIndexPage />} />
       <Route path="/report/:id" element={<ReportPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />

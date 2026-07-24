@@ -41,4 +41,18 @@ export const blogPosts = [
     keywords: 'landing page audit tool, crazyegg alternative, CRO tools for startups',
     date: '2026-07-20',
   },
+  {
+    slug: 'free-cro-audit-tool',
+    title: 'Free CRO Audit Tool: Why Every Founder Needs One Before Launching',
+    description: 'Before you launch your landing page, run it through a free CRO audit tool. Learn why founders waste months on pages that don'\''t convert.',
+    keywords: 'free cro audit tool, free landing page audit, AI landing page audit, CRO audit tool',
+    date: '2026-07-24',
+  },
+  {
+    slug: 'auditfast-vs-hotjar',
+    title: 'AuditFast vs Hotjar: Which Landing Page Analysis Tool Is Right for You?',
+    description: 'Compare AuditFast'\''s instant AI audit ($10 one-time) with Hotjar'\''s heatmaps and session recordings. Find out which fits your startup stage.',
+    keywords: 'auditfast vs hotjar, hotjar alternative, landing page analysis tool, CRO software',
+    date: '2026-07-24',
+  },
 ];

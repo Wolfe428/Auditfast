@@ -15,6 +15,7 @@ import BlogBestCROAuditTools2026 from './pages/BestCROAuditTools2026.jsx'
 import BlogLandingPageAuditChecklist2026 from './pages/LandingPageAuditChecklist2026.jsx'
 import BlogImproveLandingConversion from './pages/ImproveLandingConversion.jsx'
 import BlogSaaSLandingPageOptimization from './pages/SaaSLandingPageOptimization.jsx'
+import BlogLandingPageABTesting from './pages/LandingPageABTesting.jsx'
 import BlogAuditFastVsHotjar from './pages/AuditFastVsHotjar.jsx'
 import BlogIndexPage from './pages/BlogIndexPage.jsx'
 
@@ -36,6 +37,7 @@ export default function App() {
       <Route path="/blog/landing-page-audit-checklist-2026" element={<BlogLandingPageAuditChecklist2026 />} />
       <Route path="/blog/improve-landing-page-conversion-rate" element={<BlogImproveLandingConversion />} />
       <Route path="/blog/saas-landing-page-optimization" element={<BlogSaaSLandingPageOptimization />} />
+      <Route path="/blog/landing-page-ab-testing" element={<BlogLandingPageABTesting />} />
       <Route path="/blog/auditfast-vs-hotjar" element={<BlogAuditFastVsHotjar />} />
       <Route path="/blog/headline-formulas-that-convert" element={<BlogHeadlineFormulas />} />
       <Route path="/blog/auditfast-vs-crazyegg" element={<BlogAuditFastVsCrazyEgg />} />

@@ -62,4 +62,5 @@ export const blogPosts = [
     keywords: 'best cro audit tools, landing page optimization tools, CRO software for startups',
     date: '2026-07-24',
   },
+  { slug: 'landing-page-audit-checklist-2026', title: 'Landing Page Audit Checklist: 15 Things to Fix Before You Launch', description: '15-point CRO audit checklist for landing pages. Fix hero clarity, CTAs, trust signals, and mobile UX before you launch.', keywords: 'landing page audit checklist, CRO checklist, conversion rate optimization checklist', date: '2026-07-25' },
 ];

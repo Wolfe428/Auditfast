@@ -63,4 +63,5 @@ export const blogPosts = [
     date: '2026-07-24',
   },
   { slug: 'landing-page-audit-checklist-2026', title: 'Landing Page Audit Checklist: 15 Things to Fix Before You Launch', description: '15-point CRO audit checklist for landing pages. Fix hero clarity, CTAs, trust signals, and mobile UX before you launch.', keywords: 'landing page audit checklist, CRO checklist, conversion rate optimization checklist', date: '2026-07-25' },
+  { slug: 'improve-landing-page-conversion-rate', title: 'How to Improve Landing Page Conversion Rate: A Founder's Guide', description: '7 proven ways to improve your landing page conversion rate. Fix headlines, CTAs, trust signals, mobile UX.', keywords: 'improve landing page conversion rate, landing page conversion tips, CRO guide', date: '2026-07-25' },
 ];

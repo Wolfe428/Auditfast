@@ -55,4 +55,11 @@ export const blogPosts = [
     keywords: 'auditfast vs hotjar, hotjar alternative, landing page analysis tool, CRO software',
     date: '2026-07-24',
   },
+  {
+    slug: 'best-cro-audit-tools-2026',
+    title: 'Best CRO Audit Tools for Indie Founders in 2026',
+    description: 'Compare the top CRO audit tools for indie founders. Honest comparison of AuditFast, Hotjar, CrazyEgg, and more.',
+    keywords: 'best cro audit tools, landing page optimization tools, CRO software for startups',
+    date: '2026-07-24',
+  },
 ];

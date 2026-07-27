@@ -20,6 +20,9 @@ import BlogLandingPageBestPractices2026 from './pages/LandingPageBestPractices20
 import BlogSocialProofLandingPages from './pages/SocialProofLandingPages.jsx'
 import BlogLandingPageCopywritingTips from './pages/LandingPageCopywritingTips.jsx'
 import BlogReduceLandingPageBounceRate from './pages/ReduceLandingPageBounceRate.jsx'
+import BlogHeroSectionOptimization from './pages/HeroSectionOptimization.jsx'
+import BlogCTAButtonOptimization from './pages/CTOlanButtonOptimization.jsx'
+import BlogEarlyStageCRO from './pages/EarlyStageCRO.jsx'
 import BlogAuditFastVsHotjar from './pages/AuditFastVsHotjar.jsx'
 import BlogIndexPage from './pages/BlogIndexPage.jsx'
 
@@ -42,6 +45,9 @@ export default function App() {
       <Route path="/blog/improve-landing-page-conversion-rate" element={<BlogImproveLandingConversion />} />
       <Route path="/blog/saas-landing-page-optimization" element={<BlogSaaSLandingPageOptimization />} />
       <Route path="/blog/social-proof-landing-pages" element={<BlogSocialProofLandingPages />} />
+      <Route path="/blog/hero-section-optimization" element={<BlogHeroSectionOptimization />} />
+      <Route path="/blog/cta-button-optimization" element={<BlogCTAButtonOptimization />} />
+      <Route path="/blog/cro-for-early-stage-startups" element={<BlogEarlyStageCRO />} />
       <Route path="/blog/landing-page-copywriting-tips" element={<BlogLandingPageCopywritingTips />} />
       <Route path="/blog/reduce-landing-page-bounce-rate" element={<BlogReduceLandingPageBounceRate />} />
       <Route path="/blog/landing-page-ab-testing" element={<BlogLandingPageABTesting />} />

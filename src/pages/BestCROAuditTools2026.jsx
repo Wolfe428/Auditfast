@@ -183,7 +183,7 @@ export default function BestCROAuditTools2026() {
           <li><strong>Before launch or low traffic:</strong> Start with <a href="https://www.auditfastpro.com">AuditFast</a> (free, 60 seconds). Fix the structural issues first — headline, CTA, social proof placement. No tool that relies on visitor data will help you if your page fundamentals are broken.</li>
           <li><strong>Add Microsoft Clarity</strong> (free) once you have any traffic. Unlimited session recordings let you watch real behavior without spending a dollar.</li>
           <li><strong>Upgrade to Hotjar</strong> ($32/mo) when you need feedback widgets and surveys to understand <em>why</em> users behave certain ways.</li>
-          <li><strong>Consider CrazyEgg or VWO</strong> only when you're ready for A/B testing and have enough traffic (>1,000 visitors/month) for tests to reach significance.</li>
+          <li><strong>Consider CrazyEgg or VWO</strong> only when you're ready for A/B testing and have enough traffic ({">"}1,000 visitors/month) for tests to reach significance.</li>
         </ol>
 
         <p>

@@ -1,6 +1,6 @@
 import React from "react";
-import { SEOHead } from "../components/SEOHead";
-import { BlogPostLayout } from "../components/BlogPostLayout";
+import SEOHead from "../components/SEOHead";
+import BlogPostLayout from "../components/BlogPostLayout";
 
 export default function BlogCTAButtonOptimization() {
   return (
@@ -18,7 +18,7 @@ export default function BlogCTAButtonOptimization() {
       <p>Your CTA button carries the weight of your entire landing page. Every headline, every testimonial, every feature description exists to get visitors to click that button. Here's how to make sure it pulls its weight.</p>
 
       <h2>1. Button text: complete the sentence</h2>
-      <p>Generic CTAs like "Submit" and "Sign Up" underperform because they don't complete a thought. Your CTA text should finish the sentence your headline started. "Get my free audit." "See my conversion score." "Start improving now." Specific > generic, every time.</p>
+      <p>Generic CTAs like "Submit" and "Sign Up" underperform because they don't complete a thought. Your CTA text should finish the sentence your headline started. "Get my free audit." "See my conversion score." "Start improving now." Specific {">"} generic, every time.</p>
 
       <h2>2. Color: contrast beats branding</h2>
       <p>Your CTA should be the most visually dominant element on the page — even if it means breaking your brand palette. If everything is blue and your CTA is blue, it disappears. High contrast drives clicks. Don't let brand guidelines kill your conversion rate.</p>

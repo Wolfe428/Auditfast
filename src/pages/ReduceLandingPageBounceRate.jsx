@@ -1,6 +1,6 @@
 import React from "react";
-import { SEOHead } from "../components/SEOHead";
-import { BlogPostLayout } from "../components/BlogPostLayout";
+import SEOHead from "../components/SEOHead";
+import BlogPostLayout from "../components/BlogPostLayout";
 
 export default function BlogReduceLandingPageBounceRate() {
   return (

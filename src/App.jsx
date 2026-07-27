@@ -17,6 +17,9 @@ import BlogImproveLandingConversion from './pages/ImproveLandingConversion.jsx'
 import BlogSaaSLandingPageOptimization from './pages/SaaSLandingPageOptimization.jsx'
 import BlogLandingPageABTesting from './pages/LandingPageABTesting.jsx'
 import BlogLandingPageBestPractices2026 from './pages/LandingPageBestPractices2026.jsx'
+import BlogSocialProofLandingPages from './pages/SocialProofLandingPages.jsx'
+import BlogLandingPageCopywritingTips from './pages/LandingPageCopywritingTips.jsx'
+import BlogReduceLandingPageBounceRate from './pages/ReduceLandingPageBounceRate.jsx'
 import BlogAuditFastVsHotjar from './pages/AuditFastVsHotjar.jsx'
 import BlogIndexPage from './pages/BlogIndexPage.jsx'
 
@@ -38,6 +41,9 @@ export default function App() {
       <Route path="/blog/landing-page-audit-checklist-2026" element={<BlogLandingPageAuditChecklist2026 />} />
       <Route path="/blog/improve-landing-page-conversion-rate" element={<BlogImproveLandingConversion />} />
       <Route path="/blog/saas-landing-page-optimization" element={<BlogSaaSLandingPageOptimization />} />
+      <Route path="/blog/social-proof-landing-pages" element={<BlogSocialProofLandingPages />} />
+      <Route path="/blog/landing-page-copywriting-tips" element={<BlogLandingPageCopywritingTips />} />
+      <Route path="/blog/reduce-landing-page-bounce-rate" element={<BlogReduceLandingPageBounceRate />} />
       <Route path="/blog/landing-page-ab-testing" element={<BlogLandingPageABTesting />} />
       <Route path="/blog/landing-page-best-practices-2026" element={<BlogLandingPageBestPractices2026 />} />
       <Route path="/blog/auditfast-vs-hotjar" element={<BlogAuditFastVsHotjar />} />

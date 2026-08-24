@@ -25,6 +25,9 @@ import BlogCTAButtonOptimization from './pages/CTOlanButtonOptimization.jsx'
 import BlogEarlyStageCRO from './pages/EarlyStageCRO.jsx'
 import BlogAuditFastVsHotjar from './pages/AuditFastVsHotjar.jsx'
 import BlogIndexPage from './pages/BlogIndexPage.jsx'
+import BlogConversionRateBenchmarks from './pages/ConversionRateBenchmarks.jsx'
+import BlogLandingPageMistakes from './pages/LandingPageMistakes.jsx'
+import BlogMicroSaaSCRO from './pages/MicroSaaSCRO.jsx'
 
 export default function App() {
   return (
@@ -52,6 +55,9 @@ export default function App() {
       <Route path="/blog/reduce-landing-page-bounce-rate" element={<BlogReduceLandingPageBounceRate />} />
       <Route path="/blog/landing-page-ab-testing" element={<BlogLandingPageABTesting />} />
       <Route path="/blog/landing-page-best-practices-2026" element={<BlogLandingPageBestPractices2026 />} />
+      <Route path="/blog/conversion-rate-benchmarks-2026" element={<BlogConversionRateBenchmarks />} />
+      <Route path="/blog/landing-page-mistakes" element={<BlogLandingPageMistakes />} />
+      <Route path="/blog/cro-for-micro-saas" element={<BlogMicroSaaSCRO />} />
       <Route path="/blog/auditfast-vs-hotjar" element={<BlogAuditFastVsHotjar />} />
       <Route path="/blog/headline-formulas-that-convert" element={<BlogHeadlineFormulas />} />
       <Route path="/blog/auditfast-vs-crazyegg" element={<BlogAuditFastVsCrazyEgg />} />
